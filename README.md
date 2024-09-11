@@ -22,8 +22,8 @@ This is a simple .NET console application that demonstrates how to use Entity Fr
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/ef-core-playground.git
-   cd ef-core-playground
+   git clone https://github.com/gmaggiodev/EFCorePlayground
+   cd EFCorePlayground
    ```
 
 2. **Install EF Core and SQLite packages**:
