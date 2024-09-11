@@ -43,6 +43,10 @@ namespace EFCorePlayground
 
                 SeedData(context);
 
+                // Pagination variables
+                int pageSize = 10;
+                int pageNumber = 1; // Change this value for different pages
+
                 // Query to join Order and OrderItem
                 var query = context.Orders
                     .Join(context.OrderItems,
@@ -54,8 +58,11 @@ namespace EFCorePlayground
                             OrderName = order.OrderName,
                             OrderItemID = orderItem.ID,
                             ItemName = orderItem.ItemName
-                        });
-
+                        })
+                .OrderBy(o => o.OrderName)   // First sort by OrderName
+                .ThenBy(o => o.ItemName)     // Then sort by ItemName
+                .Skip((pageNumber - 1) * pageSize)  // Skip items for previous pages
+                .Take(pageSize);             // Take only the items for the current page
                 // Print out the results
                 foreach (var result in query)
                 {
@@ -67,17 +74,44 @@ namespace EFCorePlayground
 
         static void SeedData(AppDbContext context)
         {
-            var order1 = new Order { OrderName = "Order 1" };
-            var order2 = new Order { OrderName = "Order 2" };
+            var random = new Random();
+            var orders = new List<Order>();
 
-            context.Orders.AddRange(order1, order2);
+            // List of phone accessories products
+            var products = new List<string>
+    {
+        "Phone Case", "Screen Protector", "Wireless Charger", "Car Mount", "Power Bank",
+        "Bluetooth Headphones", "USB-C Cable", "Lightning Cable", "Phone Stand",
+        "PopSocket", "Earbuds", "Portable Speaker", "Phone Ring Holder", "Phone Cleaning Kit",
+        "SIM Card Adapter", "Phone Tripod", "Charging Dock", "Memory Card",
+        "Wireless Earbuds", "Phone Camera Lens"
+    };
 
-            var orderItems = new List<OrderItem>
+            // Create 25 Orders with descriptive names
+            for (int i = 1; i <= 25; i++)
             {
-                new OrderItem { Order = order1, ItemName = "Item 1A" },
-                new OrderItem { Order = order1, ItemName = "Item 1B" },
-                new OrderItem { Order = order2, ItemName = "Item 2A" }
-            };
+                orders.Add(new Order { OrderName = $"Order {i}: Customer {i} Phone Accessories Purchase" });
+            }
+
+            context.Orders.AddRange(orders);
+
+            var orderItems = new List<OrderItem>();
+
+            // Add random number of items (between 1 and 10) for each order
+            foreach (var order in orders)
+            {
+                int itemCount = random.Next(1, 11); // Random number between 1 and 10
+                for (int i = 1; i <= itemCount; i++)
+                {
+                    // Randomly pick a product from the list of phone accessories
+                    string randomProduct = products[random.Next(products.Count)];
+                    orderItems.Add(new OrderItem
+                    {
+                        Order = order,
+                        ItemName = $"{randomProduct} for {order.OrderName}"
+                    });
+                }
+            }
 
             context.OrderItems.AddRange(orderItems);
             context.SaveChanges();
